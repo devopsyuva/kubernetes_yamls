@@ -1,0 +1,51 @@
+Docker uses host network to container with no network isolation.
+
+Host mode networking can be useful to optimize performance, and in situations where a container needs to handle a large range of ports, as it does not require network address translation (NAT), and no “userland-proxy” is created for each port.
+
+We can take an example to deploy application like nginx which uses 80 port by default on the Docker host machine.
+
+Note: 
+1)Other applications running on Docker host already listen on 80, nginx container need to be customized to listen on different port number
+2)host network works only on Linux machines
+
+Start a container to run on detach mode (run in background)
+
+docker container run -d --rm --network host --name test-nginx nginx
+
+How to check netnamespaces create for a container?
+
+root@test:~# docker container inspect --format '{{.State.Pid}}' 681f6fb46149
+2485
+
+Now check netns directory on docker host
+
+root@test:~# ls -l /proc/2485/ns/
+total 0
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 cgroup -> 'cgroup:[4026531835]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 ipc -> 'ipc:[4026532306]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 mnt -> 'mnt:[4026532304]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:12 net -> 'net:[4026532309]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 pid -> 'pid:[4026532307]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 pid_for_children -> 'pid:[4026532307]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 user -> 'user:[4026531837]'
+lrwxrwxrwx 1 root root 0 Apr 26 06:16 uts -> 'uts:[4026532305]'
+root@test:~#
+
+
+How to configure overlay networking on two docker host machines without using docker swarm?
+
+https://docker-k8s-lab.readthedocs.io/en/latest/docker/docker-etcd.html
+
+Images:
+https://dev.vividbreeze.com/wp-content/uploads/2018/08/customBridgeNetworkDockerDNS.png --> Docker bridge network
+https://miro.medium.com/max/1400/0*cMUND9w1bO1o5sPe.png
+https://miro.medium.com/max/1264/0*f39Sdh-13He13vn7.jpg --> bridge share network
+https://i0.wp.com/lukeangel.co/wp-content/uploads/2017/01/docker-networking-diagram-1.png?w=1030 --> Docker macvlan (802.1Q trunk)
+
+https://devopsnepal.files.wordpress.com/2018/02/overlay.png?w=656
+https://miro.medium.com/max/1400/1*Pk3a-75rUpaF74WKN5n78w.jpeg
+https://docker-k8s-lab.readthedocs.io/en/latest/_images/docker-overlay.png
+
+Macvlan and ipvlan:
+
+https://sreeninet.wordpress.com/2016/05/29/macvlan-and-ipvlan/

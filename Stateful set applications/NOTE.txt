@@ -1,0 +1,36 @@
+StatefulSets are valuable for applications that require one or more of the following.
+
+Stable, unique network identifiers.
+Stable, persistent storage.
+Ordered, graceful deployment and scaling.
+Ordered, graceful deletion and termination.
+Unique nameing convention for stateful application
+Unique network identity
+Unique stable storage and ordered provisioning/termination
+Updates will be done from last and followed by next in an ordered way
+
+webserver --> 
+
+webserver-0, webserver-1, webserver-2
+
+
+Preserving the data is called Statefulset application and if we are not bothered about the application data its a Stateless application
+
+
+Cluster Domain	Service (ns/name)	StatefulSet (ns/name)	StatefulSet Domain	               Pod DNS	Pod Hostname
+cluster.local	default/nginx	    default/web	            nginx.default.svc.cluster.local	   web-{0..N-1}.nginx.default.svc.cluster.local	web-{0..N-1}
+
+cluster.local	foo/nginx	        foo/web	                nginx.foo.svc.cluster.local	web-{0..N-1}.nginx.foo.svc.cluster.local	web-{0..N-1}
+
+kube.local	    foo/nginx	        foo/web	                nginx.foo.svc.kube.local	web-{0..N-1}.nginx.foo.svc.kube.local	
+
+
+Deployment and Scaling Guarantee
+1)For a StatefulSet with N replicas, when Pods are being deployed, they are created sequentially, in order from {0..N-1}.
+2)When Pods are being deleted, they are terminated in reverse order, from {N-1..0}.
+3)Before a scaling operation is applied to a Pod, all of its predecessors must be Running and Ready.
+4)Before a Pod is terminated, all of its successors must be completely shutdown.
+
+
+
+https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/

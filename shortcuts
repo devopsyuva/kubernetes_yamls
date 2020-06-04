@@ -1,0 +1,48 @@
+How to ping all pods at once?
+=============================
+kubectl get po -o json | jq .items[].status.podIP -r | fping
+
+Sample output:
+root@kubernetesmanager:~# kubectl get po --all-namespaces -o json | jq .items[].status.podIP -r | fping
+10.244.52.9 is alive
+192.168.0.50 is alive
+192.168.0.51 is alive
+10.244.52.8 is alive
+10.244.52.7 is alive
+192.168.0.50 is alive
+192.168.0.50 is alive
+192.168.0.50 is alive
+192.168.0.50 is alive
+192.168.0.51 is alive
+192.168.0.50 is alive
+10.244.119.11 is alive
+10.244.119.10 is alive
+root@kubernetesmanager:~#
+
+
+For rollingupdates:
+===================
+kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate"}}}'
+kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":3}}}}'
+
+
+List all images running on the cluster:
+=======================================
+kubectl get pods --all-namespaces -o jsonpath="{..image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
+kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | uniq -c
+
+Sample output:
+kubernetesui/dashboard:v2.0.0-rc7root@kubernetesmanager:~# kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | uniq -c
+      1 calico/kube-controllers:v3.11.2
+      2 calico/node:v3.11.2
+      2 k8s.gcr.io/coredns:1.6.7
+      1 k8s.gcr.io/etcd:3.4.3-0
+      1 k8s.gcr.io/kube-apiserver:v1.18.2
+      1 k8s.gcr.io/kube-controller-manager:v1.18.2
+      2 k8s.gcr.io/kube-proxy:v1.18.2
+      1 k8s.gcr.io/kube-scheduler:v1.18.2
+      1 kubernetesui/metrics-scraper:v1.0.4
+      1 kubernetesui/dashboard:v2.0.0-rc7
+root@kubernetesmanager:~# 
+
+Reference: https://kubernetes.io/docs/tasks/access-application-cluster/list-all-running-container-images/
